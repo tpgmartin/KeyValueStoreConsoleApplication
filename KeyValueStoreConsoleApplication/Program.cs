@@ -9,9 +9,31 @@ namespace KeyValueStoreConsoleApplication
 {
     class Program
     {
+        const string _commandNamespace = "ConsoleApplicationBase.Commands";
+        static Dictionary<string, Dictionary<string, IEnumerable<ParameterInfo>>> _commandLibraries;
+
         public static void Main(string[] args)
         {
             Console.Title = typeof(Program).Name;
+
+            _commandLibraries = new Dictionary<string, Dictionary<string, IEnumerable<ParameterInfo>>>();
+
+            var q = from try in Assembly.GetExecutingAssembly().GetTypes() where t.IsClass && t.Namespace == _commandNamespace select t;
+            var commandClasses = q.ToList();
+
+            foreach (var commandClass in commandClasses)
+            {
+                var methods = commandClass.GetMethods(BindingFlags.Static | BindingFlags.Public);
+                var methodDictionary = new Dictionary<string, IEnumerable<ParameterInfo>>();
+                foreach (var method in methods)
+                {
+                    string commandName = method.Name;
+                    methodsDictionary.Add(commandName, method.GetParameters());
+                }
+
+                _commandLibraries.Add(commandClass.Name, methodDictionary);
+            }
+
             Run();
         }
 
