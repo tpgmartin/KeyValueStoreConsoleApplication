@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.Reflection;
 
 namespace KeyValueStoreConsoleApplication
 {
-    class MainClass
+    class Program
     {
         public static void Main(string[] args)
         {
-            Console.Title = typeof(MainClass).Name;
+            Console.Title = typeof(Program).Name;
             Run();
         }
 
@@ -19,7 +24,8 @@ namespace KeyValueStoreConsoleApplication
 
                 try
                 {
-                    string result = Execute(consoleInput);
+                    var cmd = new ConsoleCommand(consoleInput);
+                    string result = Execute(cmd);
                     WriteToConsole(result);
                 }
                 catch (Exception ex)
@@ -29,9 +35,15 @@ namespace KeyValueStoreConsoleApplication
             }
         }
 
-        static string Execute(string command)
+        static string Execute(ConsoleCommand command)
         {
-            return string.Format("Executed the {0} Command", command);
+            var sb = new StringBuilder();
+            sb.AppendLine(string.Format("Executed the {0}.{1} Command", command.LibraryClassName, command.Name));
+            for (int i = 0; i < command.Arguments.Count(); i++)
+            {
+                sb.AppendLine(ConsoleFormatting.Indent(4) + string.Format("Argument{0} value: {1}", i, command.Arguments.ElementAt(i)));
+            }
+            return sb.ToString();
         }
 
         public static void WriteToConsole(string message = "")
